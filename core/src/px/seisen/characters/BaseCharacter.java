@@ -2,57 +2,66 @@ package px.seisen.characters;
 
 import com.badlogic.gdx.graphics.Texture;
 
-public class BaseCharacter {
-    protected final int movementSpeed;
-    protected String id, name;
-    protected int width, height;
-    protected int attackCooldown;
-    protected int health;
-    protected int damage;
+public abstract class BaseCharacter {
 
-    public BaseCharacter() {
-        this.id = "base_demo";
-        this.name = "BaseDemoCharacter";
-        this.width = 100;
-        this.height = 200;
-        this.movementSpeed = 400;
-        this.attackCooldown = 500;
-        this.health = 200;
-        this.damage = 10;
+    private final String id;
+    private final String name;
+    private final int width;
+    private final int height;
+    private final int movementSpeed;
+    private final int attackCooldown;
+    private int health;
+    private final int damage;
+
+    protected BaseCharacter(String id, String name, int width, int height, int movementSpeed, int attackCooldown, int health, int damage) {
+        this.id = id;
+        this.name = name;
+        this.width = width;
+        this.height = height;
+        this.movementSpeed = movementSpeed;
+        this.attackCooldown = attackCooldown;
+        this.health = health;
+        this.damage = damage;
+    }
+
+    // Getters for the fields that are final and hence won't change. Other setters/getters can be added based on needs.
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getMovementSpeed() {
+        return movementSpeed;
+    }
+
+    public int getAttackCooldown() {
+        return attackCooldown;
     }
 
     public int getHealth() {
-        return this.health;
+        return health;
     }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
     public int getDamage() {
-        return this.damage;
+        return damage;
     }
 
     public Texture getTexture(String state) {
         return new Texture("characters/" + this.id + "/" + state + ".png");
-    }
-
-    public String getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public int getWidth() {
-        return this.width;
-    }
-
-    public int getHeight() {
-        return this.height;
-    }
-    
-    public int getMovementSpeed() {
-        return this.movementSpeed;
-    }
-
-    public int getAttackCooldown() {
-        return this.attackCooldown;
     }
 }

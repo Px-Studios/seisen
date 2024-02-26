@@ -2,10 +2,6 @@ package px.seisen.characters;
 
 public class Samurai extends BaseCharacter {
     public Samurai() {
-        this.id = "samurai";
-        this.name = "Samurai";
-        this.width = (int) (84*1.3);
-        this.height = (int) (154*1.3);
-        this.attackCooldown = 500;
+        super("samurai", "Samurai", (int) (84*1.3), (int) (154*1.3), 300, 500, 100,   10);
     }
 }

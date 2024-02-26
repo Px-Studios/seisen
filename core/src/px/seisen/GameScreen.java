@@ -3,12 +3,10 @@ package px.seisen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 
-import px.seisen.characters.Hitbox;
 import px.seisen.characters.Samurai;
 import px.seisen.stages.BaseStage;
 
@@ -29,10 +27,10 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
 
-        backgroundTex = new Texture("stages/" + stage.stageId + ".png");
+        backgroundTex = new Texture("stages/" + stage.getStageId() + ".png");
 
-        player1 = new Player("Player 1", new Samurai(), true);
-        player2 = new Player("Player 2", new Samurai(), false);
+        player1 = new Player("Player 1", new Samurai(), true, stage.getStageHeight());
+        player2 = new Player("Player 2", new Samurai(), false, stage.getStageHeight());
 
         Sound sound = Gdx.audio.newSound(Gdx.files.internal("audio/soundtrack.mp3"));
         sound.play(0.05f);

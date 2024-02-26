@@ -2,6 +2,7 @@ build/*
 .gradle/*
 .idea/*
 desktop/build/*
+core/build/*
 
 # Compiled class file
 *.class

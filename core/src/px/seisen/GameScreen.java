@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
+import px.seisen.characters.Bunny;
 import px.seisen.characters.Samurai;
 import px.seisen.stages.BaseStage;
 
@@ -29,7 +30,7 @@ public class GameScreen implements Screen {
 
         backgroundTex = new Texture("stages/" + stage.getStageId() + ".png");
 
-        player1 = new Player("Player 1", new Samurai(), true, stage.getStageHeight());
+        player1 = new Player("Player 1", new Bunny(), true, stage.getStageHeight());
         player2 = new Player("Player 2", new Samurai(), false, stage.getStageHeight());
 
         Sound sound = Gdx.audio.newSound(Gdx.files.internal("audio/soundtrack.mp3"));
@@ -49,8 +50,8 @@ public class GameScreen implements Screen {
         player1.updateSprite();
         player2.updateSprite();
 
-        player1.applyPhysics(delta*15);
-        player2.applyPhysics(delta*15);
+        player1.getMovement().applyPhysics(delta*15);
+        player2.getMovement().applyPhysics(delta*15);
 
         player1.getSprite().draw(game.batch);
         player2.getSprite().draw(game.batch);

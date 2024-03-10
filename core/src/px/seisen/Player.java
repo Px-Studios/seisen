@@ -4,11 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import px.seisen.characters.BaseCharacter;
-
-import javax.sound.midi.SysexMessage;
+import px.seisen.logic.Aura;
+import px.seisen.logic.Attacks;
+import px.seisen.logic.Movement;
 
 public class Player {
-    private final BaseCharacter character;
+
+    private final int stageHeight;
+    private int health;
     private boolean isFacingRight;
     private boolean isJumping;
     private final boolean isPlayerOne;
@@ -20,17 +23,18 @@ public class Player {
     private Sprite sprite;
     private float targetX;
     private float knockbackAnimationProgress;
-    private float jumpVelocity;
-    private int health;
-    private final float GRAVITY = -9.8f; // Gravity, adjust as needed for your game scale
-    private final float INITIAL_JUMP_VELOCITY = 30f; // Initial jump velocity, adjust for desired jump height
     private boolean canCrit;
     private int auraTime;
     private long lastAuraTime;
-    private Sound auraSound;
+    private final Sound auraSound;
     private float auraX;
     private float auraY;
-    private long auraSoundId;
+    private final long auraSoundId;
+
+    private final BaseCharacter character;
+    private final Movement movement;
+    private final Attacks attacks;
+    private final Aura aura;
 
     public Player(String name, BaseCharacter character, boolean isPlayerOne, int stageHeight) {
         this.name = name;
@@ -50,6 +54,7 @@ public class Player {
         this.auraX = 0;
         this.auraY = 0;
         this.auraSoundId = -1;
+        this.stageHeight = stageHeight;
 
         if (isPlayerOne) {
             this.x = 100;
@@ -58,61 +63,9 @@ public class Player {
         }
         this.y = 80;
 
-    }
-
-    public void resetAura() {
-        if (this.auraTime == 0) {
-            return;
-        }
-        this.auraTime = 0;
-        this.auraSound.stop();
-
-        if (this.y != 80) {
-            this.y = 80;
-        }
-    }
-
-    public void aura(float timeDelta) {
-        if (this.isJumping) {
-            return;
-        }
-
-        // don't allow a new aura if the last one was less than 3 seconds ago
-        if (System.currentTimeMillis() - this.lastAuraTime < 3000) {
-            return;
-        }
-
-        if (this.auraTime == 0) {
-            this.auraX = this.x;
-            this.auraY = this.y;
-        }
-
-        this.auraTime += (int) (timeDelta * 1000);
-
-        if (this.auraTime > 3000) {
-            this.auraTime = 0;
-            this.auraSoundId = auraSound.play(0.03f);
-            this.lastAuraTime = System.currentTimeMillis();
-
-            if (this.y != 80) {
-                this.y = 80;
-            }
-         }
-    }
-
-    public void attack(Player otherPlayer) {
-        if (System.currentTimeMillis() - this.lastAttackTime < this.character.getAttackCooldown()) {
-            return;
-        }
-
-        if (!this.canHit(otherPlayer)) {
-            return;
-        }
-
-        this.lastAttackTime = System.currentTimeMillis();
-        Sound sound = Gdx.audio.newSound(Gdx.files.internal("characters/" + this.character.getId() + "/attack.mp3"));
-        sound.play(0.3f);
-        otherPlayer.gotHit(this);
+        this.movement = new Movement(this);
+        this.attacks = new Attacks(this);
+        this.aura = new Aura(this);
     }
 
     public void gotHit(Player otherPlayer) {
@@ -150,15 +103,6 @@ public class Player {
         }
     }
 
-    public boolean canHit(Player otherPlayer) {
-        float leftEdge = this.x;
-        float rightEdge = this.x + this.character.getWidth();
-        float otherLeftEdge = otherPlayer.getX();
-        float otherRightEdge = otherPlayer.getX() + otherPlayer.getCharacter().getWidth();
-
-        return (leftEdge < otherRightEdge && rightEdge > otherLeftEdge);
-    }
-
     public void updateSprite() {
         Sprite sprite = new Sprite(this.getCharacter().getTexture(this.getState()));
 
@@ -185,7 +129,7 @@ public class Player {
             float auraIntensity = 1.f - ((float) (System.currentTimeMillis() - this.lastAuraTime) / 1000);
             sprite.setColor(1-auraIntensity, 1, 1-auraIntensity, 1-auraIntensity);
             this.auraSound.setVolume(this.auraSoundId, auraIntensity);
-            this.health += (int) ((System.currentTimeMillis() - this.lastAuraTime) / 100);
+            this.health += (int) (auraIntensity * 2);
         }
 
         sprite.setPosition(this.x, this.y);
@@ -202,33 +146,8 @@ public class Player {
         this.sprite = sprite;
     }
 
-    public void jump() {
-        if (!isJumping) {
-            isJumping = true;
-            jumpVelocity = INITIAL_JUMP_VELOCITY;
-        }
-    }
-
-    public void applyPhysics(float deltaTime) {
-        this.canCrit = false;
-        if (isJumping) {
-            jumpVelocity += GRAVITY * deltaTime;
-            y += jumpVelocity * deltaTime;
-            this.canCrit = jumpVelocity < 0;
-
-            if (y <= 80) {
-                y = 80;
-                isJumping = false;
-            }
-        }
-    }
-
-    public Sprite getSprite() {
-        return this.sprite;
-    }
-
     public void updateSpritePosition() {
-        this.stayInBounds();
+        this.movement.stayInBounds();
         this.updateSprite();
 
         if (this.auraTime != 0) {
@@ -242,27 +161,115 @@ public class Player {
         }
     }
 
-    public void moveLeft(float timeDelta) {
-        this.x -= this.character.getMovementSpeed() * timeDelta;
-        this.isFacingRight = false;
-        this.updateSpritePosition();
+    public Sprite getSprite() {
+        return this.sprite;
     }
 
-    public void moveRight(float timeDelta) {
-        this.x += this.character.getMovementSpeed() * timeDelta;
-        this.isFacingRight = true;
-        this.updateSpritePosition();
+    public Movement getMovement() {
+        return movement;
     }
 
-    public void stayInBounds() {
-        if (this.x < 0) {
-            this.x = 0;
-        }
+    public Aura getAura() {
+        return aura;
+    }
 
-        float rightEdgePosition = this.x + this.character.getWidth();
-        if (rightEdgePosition > 800) {
-            this.x = 800 - this.character.getWidth();
-        }
+    public Attacks getAttacks() {
+        return attacks;
+    }
+
+    public boolean isCanCrit() {
+        return canCrit;
+    }
+
+    public float getAuraX() {
+        return auraX;
+    }
+
+    public float getAuraY() {
+        return auraY;
+    }
+
+    public float getTargetX() {
+        return targetX;
+    }
+
+    public int getAuraTime() {
+        return auraTime;
+    }
+
+    public float getKnockbackAnimationProgress() {
+        return knockbackAnimationProgress;
+    }
+
+    public long getLastAuraTime() {
+        return lastAuraTime;
+    }
+
+    public void setLastAuraTime(long lastAuraTime) {
+        this.lastAuraTime = lastAuraTime;
+    }
+
+    public void setKnockbackAnimationProgress(float knockbackAnimationProgress) {
+        this.knockbackAnimationProgress = knockbackAnimationProgress;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public void setAuraTime(int auraTime) {
+        this.auraTime = auraTime;
+    }
+
+    public void setAuraX(float auraX) {
+        this.auraX = auraX;
+    }
+
+    public void setAuraY(float auraY) {
+        this.auraY = auraY;
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public void setCanCrit(boolean canCrit) {
+        this.canCrit = canCrit;
+    }
+
+    public int getStageHeight() {
+        return this.stageHeight;
+    }
+
+    public void setJumping(boolean isJumping) {
+        this.isJumping = isJumping;
+    }
+
+    public void setFacingRight(boolean isFacingRight) {
+        this.isFacingRight = isFacingRight;
+    }
+
+    public void setLastAttackTime(long lastAttackTime) {
+        this.lastAttackTime = lastAttackTime;
+    }
+
+    public void setLastGotHitTime(long lastGotHitTime) {
+        this.lastGotHitTime = lastGotHitTime;
+    }
+
+    public void setLastMoveSoundTime(long lastMoveSoundTime) {
+        this.lastMoveSoundTime = lastMoveSoundTime;
+    }
+
+    public void setTargetX(float targetX) {
+        this.targetX = targetX;
+    }
+
+    public Sound getAuraSound() {
+        return auraSound;
     }
 
     public int getHealth() {
@@ -298,5 +305,9 @@ public class Player {
 
     public long getLastGotHitTime() {
         return lastGotHitTime;
+    }
+
+    public void setIsJumping(boolean isJumping) {
+        this.isJumping = isJumping;
     }
 }

@@ -9,62 +9,68 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 
 import px.seisen.characters.Bunny;
 import px.seisen.characters.Samurai;
+import px.seisen.logic.Boomerang;
 import px.seisen.stages.BaseStage;
 
 public class GameScreen implements Screen {
-    final Seisen game;
-    private final BaseStage stage;
+    private final Seisen game;
     private final KeyboardControls keyboardControls;
-    OrthographicCamera camera;
-    Texture backgroundTex;
+    private OrthographicCamera camera;
+    private Texture backgroundTex;
+    private final Player player1, player2;
+    private final Boomerang boomerang1;
 
-    Player player1, player2;
+public GameScreen(final Seisen game, BaseStage stage) {
+    this.game = game;
+    this.keyboardControls = new KeyboardControls();
 
-    public GameScreen(final Seisen game, BaseStage stage) {
-        this.game = game;
-        this.stage = stage;
-        this.keyboardControls = new KeyboardControls();
+    camera = new OrthographicCamera();
+    camera.setToOrtho(false, 800, 480);
 
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 480);
+    backgroundTex = new Texture("stages/" + stage.getStageId() + ".png");
 
-        backgroundTex = new Texture("stages/" + stage.getStageId() + ".png");
+    player1 = new Player("Player 1", new Bunny(), true, stage.getStageHeight());
+    player2 = new Player("Player 2", new Samurai(), false, stage.getStageHeight());
+    boomerang1 = new Boomerang(player1, player2);
+    player1.setBoomerang(boomerang1);
 
-        player1 = new Player("Player 1", new Bunny(), true, stage.getStageHeight());
-        player2 = new Player("Player 2", new Samurai(), false, stage.getStageHeight());
+    Sound sound = Gdx.audio.newSound(Gdx.files.internal("audio/soundtrack.mp3"));
+    sound.play(0.05f);
+}
 
-        Sound sound = Gdx.audio.newSound(Gdx.files.internal("audio/soundtrack.mp3"));
-        sound.play(0.05f);
-    }
+private void updatePlayer(Player player, float delta) {
+    player.updateSprite();
+    player.getMovement().applyPhysics(delta*15);
+    player.getSprite().draw(game.batch);
+}
 
-    @Override
-    public void render(float delta) {
-        ScreenUtils.clear(0, 0, 0, 1);
+private void updateBoomerang(Boomerang boomerang, float delta) {
+    boomerang.update();
+    boomerang.getSprite().draw(game.batch);
+}
 
-        camera.update();
-        game.batch.setProjectionMatrix(camera.combined);
+@Override
+public void render(float delta) {
+    ScreenUtils.clear(0, 0, 0, 1);
 
-        game.batch.begin();
-        game.batch.draw(backgroundTex, 0, 0, 800, 480);
+    camera.update();
+    game.batch.setProjectionMatrix(camera.combined);
 
-        player1.updateSprite();
-        player2.updateSprite();
+    game.batch.begin();
+    game.batch.draw(backgroundTex, 0, 0, 800, 480);
 
-        player1.getMovement().applyPhysics(delta*15);
-        player2.getMovement().applyPhysics(delta*15);
+    updatePlayer(player1, delta);
+    updatePlayer(player2, delta);
+    updateBoomerang(boomerang1, delta);
 
-        player1.getSprite().draw(game.batch);
-        player2.getSprite().draw(game.batch);
+    game.font.draw(game.batch, "P1 HP: " + player1.getHealth(), 10, 470);
+    game.font.draw(game.batch, "P2 HP: " + player2.getHealth(), 700, 470);
 
-        game.font.draw(game.batch, "P1 HP: " + player1.getHealth(), 10, 470);
-        game.font.draw(game.batch, "P2 HP: " + player2.getHealth(), 700, 470);
+    game.batch.end();
 
-        game.batch.end();
-
-        delta = Gdx.graphics.getDeltaTime();
-        keyboardControls.handleInput(player1, player2, delta);
-    }
-
+    delta = Gdx.graphics.getDeltaTime();
+    keyboardControls.handleInput(player1, player2, delta);
+}
     @Override
     public void resize(int width, int height) {
         float aspectRatio = (float) height / (float) width;

@@ -3,6 +3,7 @@ package px.seisen.logic;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import px.seisen.Player;
+import px.seisen.characters.Bunny;
 
 public class Attacks {
     private final Player player;
@@ -16,23 +17,22 @@ public class Attacks {
             return;
         }
 
-        if (!this.canHit(otherPlayer)) {
-            return;
+        player.setLastAttackTime(System.currentTimeMillis());
+
+        boolean toRight = player.isFacingRight();
+
+        if (player.getCharacter() instanceof Bunny) {
+            player.getBoomerang().startThrowing();
+
+        } else {
+            if (!player.canHit(otherPlayer)) {
+                return;
+            }
+
+            otherPlayer.gotHit(player, toRight);
         }
 
-        player.setLastAuraTime(System.currentTimeMillis());
         Sound sound = Gdx.audio.newSound(Gdx.files.internal("characters/" + player.getCharacter().getId() + "/attack.mp3"));
         sound.play(0.3f);
-        otherPlayer.gotHit(player);
     }
-
-    public boolean canHit(Player otherPlayer) {
-        float leftEdge = player.getX();
-        float rightEdge = player.getX() + player.getCharacter().getWidth();
-        float otherLeftEdge = otherPlayer.getX();
-        float otherRightEdge = otherPlayer.getX() + otherPlayer.getCharacter().getWidth();
-
-        return (leftEdge < otherRightEdge && rightEdge > otherLeftEdge);
-    }
-
 }

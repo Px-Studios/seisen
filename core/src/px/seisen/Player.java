@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import px.seisen.characters.BaseCharacter;
+import px.seisen.characters.Bunny;
 import px.seisen.logic.Aura;
 import px.seisen.logic.Attacks;
+import px.seisen.logic.Boomerang;
 import px.seisen.logic.Movement;
 
 public class Player {
@@ -35,6 +37,7 @@ public class Player {
     private final Movement movement;
     private final Attacks attacks;
     private final Aura aura;
+    private Boomerang boomerang;
 
     public Player(String name, BaseCharacter character, boolean isPlayerOne, int stageHeight) {
         this.name = name;
@@ -55,6 +58,7 @@ public class Player {
         this.auraY = 0;
         this.auraSoundId = -1;
         this.stageHeight = stageHeight;
+        this.boomerang = null;
 
         if (isPlayerOne) {
             this.x = 100;
@@ -68,7 +72,16 @@ public class Player {
         this.aura = new Aura(this);
     }
 
-    public void gotHit(Player otherPlayer) {
+    public boolean canHit(Player otherPlayer) {
+        float leftEdge = this.getX();
+        float rightEdge = this.getX() + this.getCharacter().getWidth();
+        float otherLeftEdge = otherPlayer.getX();
+        float otherRightEdge = otherPlayer.getX() + otherPlayer.getCharacter().getWidth();
+
+        return (leftEdge < otherRightEdge && rightEdge > otherLeftEdge);
+    }
+
+    public void gotHit(Player otherPlayer, boolean toRight) {
         this.lastGotHitTime = System.currentTimeMillis();
 
         int baseDamage = otherPlayer.getCharacter().getDamage();
@@ -86,7 +99,7 @@ public class Player {
             knockback = 50;
         }
 
-        if (otherPlayer.isFacingRight) {
+        if (toRight) {
             this.targetX = this.x + knockback;
         } else {
             this.targetX = this.x - knockback;
@@ -159,6 +172,14 @@ public class Player {
             sound.play(Math.min(0.5f, (float) Math.random() * 0.2f + 0.1f));
             this.lastMoveSoundTime = System.currentTimeMillis();
         }
+    }
+
+    public void setBoomerang(Boomerang boomerang) {
+        this.boomerang = boomerang;
+    }
+
+    public Boomerang getBoomerang() {
+        return this.boomerang;
     }
 
     public Sprite getSprite() {

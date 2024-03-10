@@ -1,6 +1,7 @@
 package px.seisen.logic;
 
 import px.seisen.Player;
+import px.seisen.characters.Bunny;
 
 public class Movement {
     private final Player player;
@@ -37,7 +38,10 @@ public class Movement {
         if (player.isJumping()) {
             jumpVelocity += GRAVITY * deltaTime;
             player.setY(player.getY() + jumpVelocity * deltaTime);
-            player.setCanCrit(jumpVelocity < 0);
+
+            if (!(player.getCharacter() instanceof Bunny)) {
+                player.setCanCrit(jumpVelocity < 0);
+            }
 
             if (player.getY() < player.getStageHeight()) {
                 player.setY(player.getStageHeight());

@@ -36,7 +36,7 @@ public class Aura {
             player.setAuraY(player.getY());
         }
 
-        player.setAuraTime((int) (timeDelta * 1000));
+        player.setAuraTime(player.getAuraTime() + (int) (timeDelta * 1000));
 
         if (player.getAuraTime() > 3000) {
             player.setAuraTime(0);

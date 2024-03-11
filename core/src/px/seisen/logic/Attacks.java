@@ -33,6 +33,6 @@ public class Attacks {
         }
 
         Sound sound = Gdx.audio.newSound(Gdx.files.internal("characters/" + player.getCharacter().getId() + "/attack.mp3"));
-        sound.play(0.3f);
+        sound.play(0.15f);
     }
 }

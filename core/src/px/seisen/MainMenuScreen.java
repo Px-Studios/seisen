@@ -69,7 +69,6 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
-        // No additional setup required here
     }
 
     @Override

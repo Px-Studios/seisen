@@ -43,7 +43,7 @@ public class MainMenuScreen implements Screen {
         helpImage.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Gdx.net.openURI("https://github.com/px-studios/seisen");
+                Gdx.net.openURI("https://github.com/px-studios/seisen#readme");
             }
         });
 

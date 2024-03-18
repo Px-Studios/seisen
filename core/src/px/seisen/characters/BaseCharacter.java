@@ -12,8 +12,10 @@ public abstract class BaseCharacter {
     private final int attackCooldown;
     private int health;
     private final int damage;
+    private final int jumpVelocity;
 
-    protected BaseCharacter(String id, String name, int width, int height, int movementSpeed, int attackCooldown, int health, int damage) {
+
+    protected BaseCharacter(String id, String name, int width, int height, int movementSpeed, int attackCooldown, int health, int damage, int jumpVelocity) {
         this.id = id;
         this.name = name;
         this.width = width;
@@ -22,12 +24,14 @@ public abstract class BaseCharacter {
         this.attackCooldown = attackCooldown;
         this.health = health;
         this.damage = damage;
+        this.jumpVelocity = jumpVelocity;
     }
 
     // Getters for the fields that are final and hence won't change. Other setters/getters can be added based on needs.
     public String getId() {
         return id;
     }
+    public int getJumpVelocity() { return jumpVelocity; }
 
     public String getName() {
         return name;

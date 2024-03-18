@@ -43,7 +43,6 @@ public class MainMenuScreen implements Screen {
         helpImage.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // open https://github.com/px-studios/seisen
                 Gdx.net.openURI("https://github.com/px-studios/seisen");
             }
         });
@@ -55,7 +54,6 @@ public class MainMenuScreen implements Screen {
             }
         });
 
-        // Create a table to layout the buttons
         Table table = new Table();
         table.setFillParent(true);
         table.add(startImage).padBottom(20).row();
@@ -63,9 +61,9 @@ public class MainMenuScreen implements Screen {
         table.add(quitImage).padBottom(20);
         stage.addActor(table);
 
-        // play soundtrack
         Sound sound = Gdx.audio.newSound(Gdx.files.internal("audio/main-menu.mp3"));
-        sound.play(0.05f);
+        long soundId = sound.play(0.05f);
+        sound.setLooping(soundId, true);
         this.theme = sound;
     }
 

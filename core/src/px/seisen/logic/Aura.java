@@ -22,11 +22,9 @@ public class Aura {
     }
 
     public void aura(float timeDelta) {
-        if (player.isJumping()) {
-            return;
-        }
+        if (player.isLocked()) { return; }
+        if (player.isJumping()) { return; }
 
-        // don't allow a new aura if the last one was less than 3 seconds ago
         if (System.currentTimeMillis() - player.getLastAuraTime() < 3000) {
             return;
         }
@@ -40,7 +38,7 @@ public class Aura {
 
         if (player.getAuraTime() > 3000) {
             player.setAuraTime(0);
-            player.getAuraSound().play(0.03f);
+            player.getAuraSound().play(0.3f);
             player.setLastAuraTime(System.currentTimeMillis());
 
             if (player.getY() != 80) {

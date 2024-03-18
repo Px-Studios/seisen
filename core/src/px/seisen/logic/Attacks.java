@@ -13,6 +13,7 @@ public class Attacks {
     }
 
     public void attack(Player otherPlayer) {
+        if (player.isLocked()) { return; }
         if (System.currentTimeMillis() - player.getLastAttackTime() < player.getCharacter().getAttackCooldown()) {
             return;
         }

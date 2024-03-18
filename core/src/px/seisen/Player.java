@@ -13,6 +13,8 @@ import px.seisen.logic.Movement;
 public class Player {
 
     private final int stageHeight;
+    private boolean isLocked;
+    private final long spawnedTime;
     private int health;
     private boolean isFacingRight;
     private boolean isJumping;
@@ -59,6 +61,8 @@ public class Player {
         this.auraSoundId = -1;
         this.stageHeight = stageHeight;
         this.boomerang = null;
+        this.spawnedTime = System.currentTimeMillis();
+        this.isLocked = true;
 
         if (isPlayerOne) {
             this.x = 100;
@@ -118,6 +122,9 @@ public class Player {
 
     public void updateSprite() {
         Sprite sprite = new Sprite(this.getCharacter().getTexture(this.getState()));
+        if (System.currentTimeMillis() - this.spawnedTime > 3000 && System.currentTimeMillis() - this.spawnedTime < 4000) {
+            this.isLocked = false;
+        }
 
         if (this.auraTime == 0) {
             if (this.knockbackAnimationProgress < 1) {
@@ -141,8 +148,10 @@ public class Player {
         if (System.currentTimeMillis() - this.lastAuraTime < 1000) {
             float auraIntensity = 1.f - ((float) (System.currentTimeMillis() - this.lastAuraTime) / 1000);
             sprite.setColor(1-auraIntensity, 1, 1-auraIntensity, 1-auraIntensity);
-            this.auraSound.setVolume(this.auraSoundId, auraIntensity);
-            this.health += (int) (auraIntensity * 2);
+
+            if (System.currentTimeMillis() - this.lastAuraTime < 300 && this.health < this.character.getHealth()) {
+                this.health++;
+            }
         }
 
         sprite.setPosition(this.x, this.y);
@@ -172,6 +181,13 @@ public class Player {
             sound.play(Math.min(0.5f, (float) Math.random() * 0.2f + 0.1f));
             this.lastMoveSoundTime = System.currentTimeMillis();
         }
+    }
+
+    public boolean isLocked() {
+        return this.isLocked;
+    }
+    public void setLocked(boolean isLocked) {
+        this.isLocked = isLocked;
     }
 
     public void setBoomerang(Boomerang boomerang) {

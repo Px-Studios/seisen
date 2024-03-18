@@ -12,6 +12,7 @@ public class Boomerang {
     private final Sprite sprite;
     private final Player player;
     private boolean facingRight;
+    private float dropSpeed = 0.03f;
 
     public Boomerang(Player player, Player otherPlayer) {
         this.player = player;
@@ -47,14 +48,15 @@ public class Boomerang {
             x = this.startX - timePassed * 0.8f;
         }
 
+        float y = this.startY - timePassed * dropSpeed;
+
         if (x > 800 || x < 0) {
             this.startTime = -1;
             return;
         }
 
         sprite.rotate(timePassed * 0.005f);
-
-        sprite.setPosition(x, this.startY);
+        sprite.setPosition(x, y);
         sprite.setScale(3f, 3f);
     }
 
